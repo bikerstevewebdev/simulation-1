@@ -5,36 +5,42 @@ import Dashboard from './components/Dashboard/Dashboard'
 import Header from './components/Header/Header'
 import Form from './components/Form/Form'
 import axios from 'axios'
+import { Route, Switch } from 'react-router-dom'
 
 
 class App extends Component {
   constructor() {
     super()
     this.state = {
-      inventory: [],
       currentItem: {}
     }
-    this.getInventory = this.getInventory.bind(this)
+    // this.setCurrent = this.setCurrent.bind(this)
   }
 
-  componentDidMount() {
-    this.getInventory()
-  }
+  
+  // setCurrent(item) {
+  //   this.setState({
+  //     currentItem: item
+  //   })
+  // }
 
-  getInventory() {
-    axios.get('/api/products').then(res => {
-      this.setState({
-        inventory: res.data
-      })
-    })
-  }
 
   render() {
     return (
       <div className="App">
         <Header />
-        <Dashboard getInventory={this.getInventory} inventory={this.state.inventory}/>
-        <Form getProducts={this.getInventory}/>
+        <Switch>
+          <Route path="/" exact render={() => {
+            <Dashboard setCurrent={this.setCurrent} getInventory={this.getInventory} inventory={this.state.inventory}/>
+            }} />
+          <Route path="/add" render={() => {
+            <Form  />
+            }} />
+          <Route path="/edit/:id" render={() => {
+            <Form getProducts={this.getInventory} currentItem={this.state.currentItem} />
+            }} />
+        </Switch>
+        <Form  />
       </div>
     );
   }
