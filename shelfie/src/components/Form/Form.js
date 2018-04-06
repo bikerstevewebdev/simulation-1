@@ -1,14 +1,16 @@
 import React, { Component } from 'react'
 import axios from 'axios'
+import { Link } from 'react-router-dom'
 
 class Form extends Component{
     constructor(props) {
         super(props)
         this.state = {
-            name: this.props.currentItem.name || '',
-            price: this.props.currentItem.price || 0,
-            img: this.props.currentItem.img || '',
-            id: this.props.currentItem.id || null
+            name: '',
+            price: 0,
+            img: '',
+            id: 0,
+            dontUpdate: false
         }
         this.updateName = this.updateName.bind(this)
         this.updatePrice = this.updatePrice.bind(this)
@@ -18,21 +20,36 @@ class Form extends Component{
         this.updateItem = this.updateItem.bind(this)
     }
 
-    componentDidUpdate(prevProps) {
-        console.log("prevProps from Form: ", prevProps)
-        prevProps.currentItem === this.props.currentItem 
+    componentDidMount() {
+        console.log(this.props)
+        if(this.props.location.state.editing){
+        this.props.location.state.id
         ?
-         null
-        :
-        this.setState({
-             id: this.props.currentItem.id,
-             name: this.props.currentItem.name,
-             price: this.props.currentItem.price,
-             img: this.props.currentItem.img
+        axios.get(`/api/product/${this.props.location.state.id}`).then(res => {
+            const obj = res.data[0]
+            this.setState({
+                name: obj.name,
+                price: obj.price,
+                img: obj.img,
+                id: obj.id
             })
-        console.log("Current Item from Form: ", this.props.currentItem)
+        })
+        :
+        null}
     }
 
+
+    componentDidUpdate(prevProps, prevState) {
+        console.log(this.props.location.state)
+        !this.props.location.state.editing && !this.state.dontUpdate
+        ?
+        this.clearInputs()
+        :
+        null
+        
+        
+    }
+    
     updateName(e) {
         this.setState({
             name: e.target.value
@@ -56,7 +73,8 @@ class Form extends Component{
             name: '',
             price: 0,
             img: '',
-            id: null
+            id: 0,
+            dontUpdate: true
         })
     }
 
@@ -64,15 +82,12 @@ class Form extends Component{
         const { name, price, img } = this.state
         axios.post('/api/product', { name, price, img }).then(res => {
             this.clearInputs()
-            this.props.getProducts()
         })
     }
 
     updateItem() {
         const { name, price, img, id } = this.state
         axios.put(`/api/product/${id}`, {name, price, img}).then(res => {
-            alert(res.data.message)
-            this.props.getProducts()
             this.setState({
                 name: '',
                 img: '',
@@ -82,22 +97,58 @@ class Form extends Component{
         })
     }
 
+    getOne() {
+        axios.get(`/api/product/${this.props.id}`).then(res => {
+            this.setState({
+                name: res.data.name,
+                price: res.data.price,
+                img: res.data.img,
+                id: this.props.location.state.id
+            })
+        })
+    }
+
     render() {
         return(
             <div className="form">
                 <img src={this.state.img} alt={this.state.name} />
-                <input onChange={this.updateName} value={this.state.name} placeholder="Product Name"/>
+                <input onChange={this.updateName} value={this.state.name || ''} placeholder="Product Name"/>
                 <input onChange={this.updatePrice} value={this.state.price} placeholder="Product Price"/>
-                <input onChange={this.updateImg} value={this.state.img} placeholder="Product Image URL"/>
+                <input onChange={this.updateImg} value={this.state.img || ''} placeholder="Product Image URL"/>
                 <button onClick={this.clearInputs}>Cancel</button>
                 {this.state.id 
                     ?
-                    <button onClick={this.updateItem}>Save Changes</button>
+                    <Link to="/"><button onClick={this.updateItem}>Save Changes</button></Link>
                     :
-                    <button onClick={this.addItem}>Add to Inventory</button>
+                    <Link to="/"><button onClick={this.addItem}>Add to Inventory</button></Link>
                 }
             </div>
         )
     }
 }
 export default Form
+
+
+// Old initial State before Routing :
+// this.state = {
+//     name: this.props.currentItem.name || '',
+//     price: this.props.currentItem.price || 0,
+//     img: this.props.currentItem.img || '',
+//     id: this.props.currentItem.id || null
+// }
+
+// No longer needed with routing set up, using componentDidMount now and 
+// componentDidUpdate(prevProps, prevState) {
+//     console.log("prevProps from Form: ", prevProps)
+//     prevProps.currentItem === this.props.currentItem 
+//     ?
+//      null
+//     :
+//     this.setState({
+//          id: this.props.currentItem.id,
+//          name: this.props.currentItem.name,
+//          price: this.props.currentItem.price,
+//          img: this.props.currentItem.img
+//         })
+//     console.log("Current Item from Form: ", this.props.currentItem)
+// }

@@ -28,23 +28,29 @@ class Dashboard extends Component{
     deleteItem(id) {
         axios.delete(`/api/product/${id}`).then(res => {
             alert(res.data.message)
-            this.props.getInventory()
+            this.getInventory
         })
     }
 
     
     
     render() {
-        const products = this.props.inventory.map((v, i) => {
-            return <Product key={v.id} setCurrent={(item) => this.props.setCurrent(item)} updateItem={this.updateItem} deleteItem={this.deleteItem} id={v.id} name={v.name} price={v.price} img={v.img} />
+        const products = this.state.inventory.map((v, i) => {
+            return <Product key={v.id} deleteItem={this.deleteItem} id={v.id} name={v.name} price={v.price} img={v.img} />
         }) 
 
         return(
             <div className="dashboard">
-                Dashboard
                 {products}
             </div>
         )
     }
 }
 export default Dashboard
+
+
+// Removed from product prop because there is now a Link in each Product to the correct Form path
+// setCurrent={(item) => this.props.setCurrent(item)}
+
+// Removed because I guessed that this function would exist here but it actually lives in Form
+// updateItem={this.updateItem}

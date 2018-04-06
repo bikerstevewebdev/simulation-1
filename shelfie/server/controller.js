@@ -20,6 +20,8 @@ module.exports = {
     updateProduct: (req, res) => {
         req.app.get('db').update_product([req.params.id, req.body.name, req.body.price, req.body.img]).then(results => {
             res.status(200).send({message: "Success! Item Updated"})
+        }).catch(err => {
+            res.status(500).send("WHAT ARE YOU DOINGGG!!!")
         })
     },
 

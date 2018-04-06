@@ -2,12 +2,13 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const massive = require('massive')
 require('dotenv').config()
-const port = 3007;
+const port = 3021;
 const c = require('./controller.js')
 
 const app = express();
 
 app.use(bodyParser.json());
+app.use(express.static(__dirname + '/../build'))
 
 
 app.get('/api/products', c.getAll)
